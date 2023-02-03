@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MANAGER
+  CLIENT
+}
+
+model User {
+  id          Int     @id @default(autoincrement())
+  email       String  @unique
+  name        String
+  password    String
+  role        Role    @default(CLIENT)
+  accessToken String?
+  Like        Like[]
+  Cart        Cart[]
+  Order       Order[]
+}
+
+model Product {
+  id            Int             @id @default(autoincrement())
+  name          String
+  remark        String
+  category      String
+  stock         Int
+  price         Float           @default(0)
+  active        Boolean
+  deleted       Boolean
+  Product_Image Product_Image[]
+  Like          Like[]
+  Cart          Cart[]
+  Order_Detail  Order_Detail[]
+}
+
+model Product_Image {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  url       String
+}
+
+model Like {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model Cart {
+  id        Int     @id @default(autoincrement())
+  quantity  Int     @default(1)
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
+
+model Order {
+  id               Int            @id @default(autoincrement())
+  user             User           @relation(fields: [userId], references: [id])
+  userId           Int
+  total            Float
+  Order_Detail     Order_Detail[]
+}
+
+model Order_Detail {
+  id        Int     @id @default(autoincrement())
+  quantity  Int     @default(1)
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+}
